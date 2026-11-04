@@ -1,0 +1,6 @@
+{
+  "name": "NaijaPhysLab 3D",
+  "description": "Virtual 3D Physics Laboratory & WAEC/NECO Practical Examination Simulator aligned with NERDC curriculum.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

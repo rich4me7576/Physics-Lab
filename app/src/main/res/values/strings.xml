@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">NaijaPhysLab 3D</string>
+    <string name="hero_subtitle">NERDC • WAEC • NECO Virtual 3D Physics Laboratory &amp; Assessment Platform</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="nav_workbench">3D Lab</string>
+    <string name="nav_graph">Graph Sheet</string>
+    <string name="nav_exam">WAEC/NECO</string>
+    <string name="nav_ai_tutor">AI Tutor</string>
+    <string name="nav_hub">Hub &amp; Specs</string>
+    <string name="record_reading">Record Reading to Table</string>
+    <string name="calibrate_zero">Calibrate Zero-Error</string>
+    <string name="submit_practical">Grade &amp; Save Practical to Cloud</string>
+</resources>

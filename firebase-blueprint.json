@@ -1,0 +1,169 @@
+{
+  "entities": {
+    "LabAttempt": {
+      "title": "LabAttempt",
+      "description": "A student's virtual 3D physics laboratory or WAEC/NECO practical examination attempt with measurements, graphing slope, error analysis, and AI grading feedback.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The authenticated UID of the student who performed the practical."
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Display name of the student candidate."
+        },
+        "candidateNumber": {
+          "type": "string",
+          "description": "WAEC/NECO style 10-digit candidate examination number."
+        },
+        "experimentId": {
+          "type": "string",
+          "description": "Unique identifier of the physics practical experiment."
+        },
+        "experimentTitle": {
+          "type": "string",
+          "description": "Title of the WAEC/NECO/NERDC practical experiment."
+        },
+        "category": {
+          "type": "string",
+          "description": "Curriculum domain (Mechanics, Optics, Electricity, Heat, Waves, Magnetism, Modern Physics)."
+        },
+        "examBoard": {
+          "type": "string",
+          "enum": ["WAEC", "NECO", "NERDC"],
+          "description": "Aligned examination or curriculum board."
+        },
+        "score": {
+          "type": "integer",
+          "description": "Practical score awarded out of maxScore."
+        },
+        "maxScore": {
+          "type": "integer",
+          "description": "Maximum marks obtainable for the practical."
+        },
+        "slopeCalculated": {
+          "type": "number",
+          "description": "Best-fit line gradient calculated from the student's plotted graph."
+        },
+        "errorPercentage": {
+          "type": "number",
+          "description": "Experimental percentage error relative to theoretical standard."
+        },
+        "aiFeedback": {
+          "type": "string",
+          "description": "Automated examiner and AI tutor feedback on precautions, observations, and graph deduction."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the attempt was recorded (must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the attempt was last updated (must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "studentName",
+        "candidateNumber",
+        "experimentId",
+        "experimentTitle",
+        "category",
+        "examBoard",
+        "score",
+        "maxScore",
+        "slopeCalculated",
+        "errorPercentage",
+        "aiFeedback",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ClassAssignment": {
+      "title": "ClassAssignment",
+      "description": "A teacher-created physics practical assignment or mock examination task aligned with NERDC, WAEC, and NECO syllabi.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The authenticated UID of the teacher/creator."
+        },
+        "teacherName": {
+          "type": "string",
+          "description": "Name of the physics teacher."
+        },
+        "classLevel": {
+          "type": "string",
+          "enum": ["SS1", "SS2", "SS3"],
+          "description": "Senior Secondary School class level."
+        },
+        "experimentId": {
+          "type": "string",
+          "description": "Assigned virtual practical experiment ID."
+        },
+        "experimentTitle": {
+          "type": "string",
+          "description": "Title of the assigned practical experiment."
+        },
+        "examBoard": {
+          "type": "string",
+          "enum": ["WAEC", "NECO", "NERDC"],
+          "description": "Target examination standard."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format."
+        },
+        "targetAccuracyPercent": {
+          "type": "integer",
+          "description": "Maximum allowed experimental error tolerance percentage (1 to 25)."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "closed"],
+          "description": "Lifecycle status of the practical assignment."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the assignment was created (must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the assignment was updated (must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "teacherName",
+        "classLevel",
+        "experimentId",
+        "experimentTitle",
+        "examBoard",
+        "dueDate",
+        "targetAccuracyPercent",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/lab_attempts/{attemptId}": {
+      "schema": {
+        "$ref": "#/entities/LabAttempt"
+      },
+      "description": "Stores authenticated student physics practical and mock exam attempts."
+    },
+    "/class_assignments/{assignmentId}": {
+      "schema": {
+        "$ref": "#/entities/ClassAssignment"
+      },
+      "description": "Stores teacher-created practical assignments and WAEC/NECO readiness tasks."
+    }
+  }
+}

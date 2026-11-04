@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidLabAttempt(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.studentName is string && data.studentName.size() >= 1 && data.studentName.size() <= 100 &&
+             data.candidateNumber is string && data.candidateNumber.size() >= 4 && data.candidateNumber.size() <= 30 &&
+             data.experimentId is string && data.experimentId.size() >= 1 && data.experimentId.size() <= 64 &&
+             data.experimentTitle is string && data.experimentTitle.size() >= 1 && data.experimentTitle.size() <= 160 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 64 &&
+             data.examBoard is string && (data.examBoard == 'WAEC' || data.examBoard == 'NECO' || data.examBoard == 'NERDC') &&
+             data.score is int && data.score >= 0 && data.score <= 100 &&
+             data.maxScore is int && data.maxScore >= 1 && data.maxScore <= 100 &&
+             (data.slopeCalculated is int || data.slopeCalculated is float) &&
+             (data.errorPercentage is int || data.errorPercentage is float) && data.errorPercentage >= 0 && data.errorPercentage <= 100 &&
+             data.aiFeedback is string && data.aiFeedback.size() <= 2000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidClassAssignment(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.teacherName is string && data.teacherName.size() >= 1 && data.teacherName.size() <= 100 &&
+             data.classLevel is string && (data.classLevel == 'SS1' || data.classLevel == 'SS2' || data.classLevel == 'SS3') &&
+             data.experimentId is string && data.experimentId.size() >= 1 && data.experimentId.size() <= 64 &&
+             data.experimentTitle is string && data.experimentTitle.size() >= 1 && data.experimentTitle.size() <= 160 &&
+             data.examBoard is string && (data.examBoard == 'WAEC' || data.examBoard == 'NECO' || data.examBoard == 'NERDC') &&
+             data.dueDate is string && data.dueDate.size() >= 4 && data.dueDate.size() <= 32 &&
+             data.targetAccuracyPercent is int && data.targetAccuracyPercent >= 1 && data.targetAccuracyPercent <= 25 &&
+             data.status is string && (data.status == 'active' || data.status == 'closed') &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /lab_attempts/{attemptId} {
+      allow get: if isSignedIn() && isValidId(attemptId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(attemptId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'studentName', 'candidateNumber', 'experimentId',
+                         'experimentTitle', 'category', 'examBoard', 'score', 'maxScore',
+                         'slopeCalculated', 'errorPercentage', 'aiFeedback', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'studentName', 'candidateNumber', 'experimentId',
+                         'experimentTitle', 'category', 'examBoard', 'score', 'maxScore',
+                         'slopeCalculated', 'errorPercentage', 'aiFeedback', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidLabAttempt(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(attemptId) &&
+                       isValidLabAttempt(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'score', 'slopeCalculated', 'errorPercentage', 'aiFeedback', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(attemptId) && existing().userId == request.auth.uid;
+    }
+
+    match /class_assignments/{assignmentId} {
+      allow get: if isSignedIn() && isValidId(assignmentId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(assignmentId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'teacherName', 'classLevel', 'experimentId',
+                         'experimentTitle', 'examBoard', 'dueDate', 'targetAccuracyPercent',
+                         'status', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'teacherName', 'classLevel', 'experimentId',
+                         'experimentTitle', 'examBoard', 'dueDate', 'targetAccuracyPercent',
+                         'status', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidClassAssignment(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(assignmentId) &&
+                       isValidClassAssignment(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       existing().status != 'closed' &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'status', 'dueDate', 'targetAccuracyPercent', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(assignmentId) && existing().userId == request.auth.uid;
+    }
+  }
+}
